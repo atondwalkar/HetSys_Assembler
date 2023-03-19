@@ -1,0 +1,18 @@
+ 27   		SUB	R3, R3;
+ 28   		ADDC 	R3, 0xf;
+ 29   @Store		ST 	R3, M[R0, 0x0];
+ 30   		LD	R4, M[R0, 0x0];
+ 31   		CALL	U, @DecRegs;
+ 32   		CALL	U, @IncRegs;
+ 33   		JMP	U, @Store;
+ 34 @IncRegs		NOP	U, U;
+ 35   		ADDC	R3, 0x1;
+ 36   		ADDC	R4, 0x1;
+ 37   		ADDC	R5, 0x1;
+ 38			RET	U, U;
+ 38 @DecRegs		NOP	U, U;
+ 39   		SUBC	R3, 0x1;
+ 40   		SUBC	R4, 0x1;
+ 41   		SUBC	R5, 0x1;
+ 42			RET	U, U;
+

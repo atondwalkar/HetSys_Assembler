@@ -1,0 +1,4 @@
+		SUBC	R3, 0x1;
+		SUBC	R4, 0x1;
+		SUBC	R5, 0x1;
+EOT

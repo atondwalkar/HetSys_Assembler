@@ -1,0 +1,2 @@
+  8   	.task	IncRegs	;
+  9   	.task	DecRegs ;

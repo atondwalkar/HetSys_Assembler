@@ -1,0 +1,4 @@
+		ADDC	R3, 0x1;
+		ADDC	R4, 0x1;
+		ADDC	R5, 0x1;
+EOT

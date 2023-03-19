@@ -1,0 +1,57 @@
+; 	dxp's second assembly test program.
+;------------------------------------------------------------------------------
+;	Assembler directives:
+;------------------------------------------------------------------------------
+;
+;
+;
+	.directives;
+	;
+	;
+	.enddirectives;
+;------------------------------------------------------------------------------
+;	Constant segment:
+;------------------------------------------------------------------------------
+; These values are initialized in the locations at the end of the code segment.
+; For now, .word is the only constant initialization assembly directive.
+; After assembling the code, during the final run, the constant name is 
+;   replaced with its location address in the program memory.
+	.constants;
+;
+	;
+	.endconstants;
+;------------------------------------------------------------------------------
+;	Code segment:
+;------------------------------------------------------------------------------
+	.code;
+;		SUB	R0, R0;
+;		SUB	R11, R11;		debounce
+;		SUB	R7, R7;
+;		SUB	R8, R8;
+;		SUB	R9, R9;
+;		SUB	R4, R4;			mask for r8 check
+;		ADDC	R4, 0x1;
+		SUB	R5, R5;
+		SUB	R9, R9;
+		ADDC	R5, 0x1;		mask for r7 sw
+@begin		CPY	R9, R8;			store current pb value for next check
+		SUB	R6, R6;			counter for debounce
+@check		SUB 	R8, R8;			
+		LD	R8, M[R0, 0x3FF1];	{pb, sw}
+		CPY	R7, R8;			r7 will hold sw data, r8 for checking
+;		NOT	R8;
+;		RRC	R8, 0x5;		rotate pb in c
+;		JMP	C0, @begin;		c == 0 then loop again
+;		ADDC	R6, 0x1;		inc counter
+;		ADDC	R11, 0x8;
+;		ROTL	R11, 0x2;
+;		XOR	R11, R6;		check if counter is 32
+;		JMP	Z0, @check;		jump back if not
+;		RRC	R8, 0xE;
+;		AND	R8, R4;			mask pb
+;		XOR	R9, R8;
+;		JMP	Z1, @begin;		if same, invalid
+		AND	R7, R5;			mask sw
+		ST	R5, M[R0, 0x3FF1];	display to LEDs
+		JMP	U, @begin;
+	.endcode;
