@@ -28,6 +28,7 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 	char	task_names[10][20];
 	char	name[20];
 	int		index=0;
+	char	addr_A[20], addr_B[20], row_A[20], col_A[20], row_B[20], col_B[20], relu[20];
 /*---------------------------------------------------------------------------*/
 /*#define astDEBUG - printf for debugging purposes*/
 /*---------------------------------------------------------------------------*/
@@ -308,8 +309,98 @@ instruction mnemonic*/
 		printf("   Syntax Error in line %3u - expecting instruction mnemonic, \
 		<.label:>, <.endcode;>, or <;>", asf_line_number);
 			}
+			
+			
+/*---------------------------------------------------------------------------*/
+/*Translate the tensor support matrix multiplication
+/*---------------------------------------------------------------------------*/
+		if (strcmp(crt_syllable, "tensorMult") == 0)
+			{
+#ifdef astDEBUG
+		printf("   Unpacking Tensor System supported Matrix Multiplication");
+#endif
+			match = 1;
+
+			sscanf(crt_line, "%s %s %s %s %s %s %s %s", &crt_syllable, &addr_A, &row_A, &col_A, &addr_B, &row_B, &col_B, &relu);
+
+			//transfer A
+			fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x0];\n", asf_line_number); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R1, M[R0, %s];\n", asf_line_number, row_A); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R0, M[R0, %s];\n", asf_line_number, col_A); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R4, M[R0, %s];\n", asf_line_number, addr_A); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R3, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
+			
+			//transfer B
+			fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R1, M[R0, %s];\n", asf_line_number, row_B); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R0, M[R0, %s];\n", asf_line_number, col_B); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R4, M[R0, %s];\n", asf_line_number, addr_B); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R3, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
+			
+			fprintf(out3_fname, "%3u 		NOP	;\n", asf_line_number, task_names[index]); asf_line_number++;
+			
+			if(relu[0] == '1')
+			{
+				fprintf(out3_fname, "%3u		SMXU 	R0, R1;\n", asf_line_number); asf_line_number++;
+			}
+			else
+			{
+				fprintf(out3_fname, "%3u		SMXU 	R0, R0;\n", asf_line_number); asf_line_number++;
+			}
+			
+		
+		}
+		
+/*---------------------------------------------------------------------------*/
+/*Translate the dma transfer
+/*---------------------------------------------------------------------------*/
+		if (strcmp(crt_syllable, "dmaTransfer") == 0)
+			{
+#ifdef astDEBUG
+		printf("   Unpacking DMA initiated Matrix Transfer");
+#endif
+			match = 1;
+
+			sscanf(crt_line, "%s %s %s %s %s", &crt_syllable, &nxt_syllable, &addr_A, &row_A, &col_A);
+
+			//determine fifo source/destination
+			if(strcmp(nxt_syllable, "A"))
+			{
+				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x0];\n", asf_line_number); asf_line_number++;
+			}
+			else if(strcmp(nxt_syllable, "B"))
+			{
+				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
+			}
+			else if(strcmp(nxt_syllable, "X"))
+			{
+				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x2];\n", asf_line_number); asf_line_number++;
+			}
+			else if(strcmp(nxt_syllable, "W"))
+			{
+				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x3];\n", asf_line_number); asf_line_number++;
+			}
+
+			//configure rest of the registers
+			fprintf(out3_fname, "%3u   		CFGD 	R1, M[R0, %s];\n", asf_line_number, row_A); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R0, M[R0, %s];\n", asf_line_number, col_A); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R4, M[R0, %s];\n", asf_line_number, addr_A); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R3, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
+		
+		}
+			
+			
 	}/*End of sixth while loop*/
 	
+
+	
+	
+	
+	
+	
+/*---------------------------------------------------------------------------*/
+/*Append the code with the tasks included from the directives
+/*---------------------------------------------------------------------------*/
 	
 	for(index=0; index<task_counter; index++)
 	{
@@ -318,7 +409,7 @@ instruction mnemonic*/
 		printf("   Opening file %s.", name);
 		task = fopen(name, "r");
 		
-		fprintf(out3_fname, "%3u @%s		NOP	U, U;\n", asf_line_number, task_names[index]);
+		fprintf(out3_fname, "%3u @%s		NOP	;\n", asf_line_number, task_names[index]);
 		asf_line_number++;
 		
 		fgets(crt_line, 81, task);
@@ -332,7 +423,7 @@ instruction mnemonic*/
 			asf_line_number++;
 		}
 
-		fprintf(out3_fname, "%3u			RET	U, U;\n", asf_line_number);
+		fprintf(out3_fname, "%3u			RET	;\n", asf_line_number);
 		
 		fclose(task);
 	}

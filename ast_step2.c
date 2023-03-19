@@ -14,7 +14,7 @@ void step2_assembly(int1_fname, int2_fname, \
 /* Parameter types declarations. */
 /*---------------------------------------------------------------------------*/
 FILE *int1_fname; FILE *int2_fname; FILE *int3_fname; FILE	*out1_fname;
-	const char *crt_im[27]; const char *crt_opcode[27]; \
+	const char *crt_im[30]; const char *crt_opcode[30]; \
 	const char *crt_ri[16]; const char *crt_rifv[16]; const char *crt_rj[16]; \
 	const char *crt_rjfv[16]; const char *crt_mri[16];
 	{
@@ -181,10 +181,10 @@ Assemble 2-Operand instructions: ADD, SUB, AND, OR
 	if (i == 3) { i = 5; } else if ( i == 6) { i = 10;} else if(i == 11){ i = 14;}
 	else { ++i; }	}
 /*===========================================================================
-Assemble 1-Operand instructions: ADDC, SUBC, SRA, RRC, SMXU
+Assemble 1-Operand instructions: ADDC, SUBC, SRA, RRC
 ===========================================================================*/
 	i = 7;
-	while(i != 29)	{		
+	while(i != 25)	{		
 	if (strcmp(first_syllable, crt_im[i]) == 0)
 /*---------------------------------------------------------------------------*/
 /* If the mnemonic matches concatenate the OpCode field to the IW.
@@ -193,7 +193,7 @@ Assemble 1-Operand instructions: ADDC, SUBC, SRA, RRC, SMXU
 /*---------------------------------------------------------------------------*/
 /* Determine Ri and concatenate to the IW, else exit with an error.
 /*---------------------------------------------------------------------------*/
-			while (k < 27 && match2 == 0)
+			while (k < 16 && match2 == 0)
 			{ if (strcmp(second_syllable, crt_ri[k]) == 0)
 				{ strcat(crt_iw0, crt_rifv[k]); match2 = 1; } ++k; }
 			if (match2 == 0) { ErrorRifield; } k = 0;
@@ -222,7 +222,7 @@ Assemble 1-Operand instructions: ADDC, SUBC, SRA, RRC, SMXU
 /*---------------------------------------------------------------------------*/
 /* Manipulate i to skip over other OpCodes
 /*---------------------------------------------------------------------------*/
-	if (i == 8) { i = 12; } else if (i == 13){i = 19;} else if (i == 24){i = 28;}
+	if (i == 8) { i = 12; } else if (i == 13){i = 19;}
 	else { ++i; }	}
 /*===========================================================================
 Assemble LD and ST, CFGD
@@ -433,27 +433,52 @@ Assemble NOT
 /*===========================================================================
 Assemble NOP
 ===========================================================================*/	
-	
 	i = 29;
-	if (strcmp(first_syllable, crt_im[i]) == 0)
+	while(i != 30)
+	{
+		if (strcmp(first_syllable, crt_im[i]) == 0)
 	
 		{ strcpy(crt_iw0, crt_opcode[i]); match1 = 1; k = 0;
 		
-		strcat(crt_iw0, "00000000");
+			strcat(crt_iw0, "00000000");
 		
 		fprintf(out1_fname, "%04x : %s; %% %s %% \n", \
 		crt_mif_addrs, crt_iw0, first_syllable);
 		++crt_mif_addrs;	}
-		
-		
-		
-		
-		
-
-		
 	
 			if (match1 == 0) { ErrorMnemonic; break; }	
+		++i;
+	}
+	
+	
+/*===========================================================================
+Assemble SMXU
+===========================================================================*/	
+	i = 28;
+	while(i != 29)
+	{
+		if (strcmp(first_syllable, crt_im[i]) == 0)
+	
+		{ strcpy(crt_iw0, crt_opcode[i]); match1 = 1; k = 0;
+		
+		if(strcmp(second_syllable, "1") == 0)
+		{
+			strcat(crt_iw0, "00000000");
 		}	
+		else
+		{
+			strcat(crt_iw0, "00000001");
+		}
+		
+		fprintf(out1_fname, "%04x : %s; %% %s %% \n", \
+		crt_mif_addrs, crt_iw0, first_syllable);
+		++crt_mif_addrs;	}
+	
+			if (match1 == 0) { ErrorMnemonic; break; }	
+		++i;
+	}
+	
+}
 /*---------------------------------------------------------------------------*/
 /* Initialize the remaining locations in the *.mif file to 0.
 /*---------------------------------------------------------------------------*/
