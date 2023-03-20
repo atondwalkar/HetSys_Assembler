@@ -1,0 +1,17 @@
+		ST 	R0, M[R0, 0x3D00];
+		ST 	R1, M[R0, 0x3D01];
+		ST 	R2, M[R0, 0x3D02];
+		ST 	R3, M[R0, 0x3D03];
+		ST 	R4, M[R0, 0x3D04];
+		ST 	R5, M[R0, 0x3D05];
+		ST 	R6, M[R0, 0x3D06];
+		ST 	R7, M[R0, 0x3D07];
+		ST 	R8, M[R0, 0x3D08];
+		ST 	R9, M[R0, 0x3D09];
+		ST 	R10, M[R0, 0x3D0A];
+		ST 	R11, M[R0, 0x3D0B];
+		ST 	R12, M[R0, 0x3D0C];
+		ST 	R13, M[R0, 0x3D0D];
+		ST 	R14, M[R0, 0x3D0E];
+		ST 	R15, M[R0, 0x3D0F];
+EOT

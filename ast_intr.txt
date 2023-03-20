@@ -1,0 +1,30 @@
+; 	AST's test program for tasks, interrupts, and unpacking
+;------------------------------------------------------------------------------
+;	Assembler directives:
+;------------------------------------------------------------------------------
+	.directives;
+	.task	IncRegs	;
+	.task	DecRegs ;
+	.task	SaveSys	;
+	.intr	Keyboard	@SaveSys	;
+	.enddirectives;
+;------------------------------------------------------------------------------
+;	Constant segment:
+;------------------------------------------------------------------------------
+	.constants;
+;
+	.endconstants;
+;------------------------------------------------------------------------------
+;	Code segment:
+;------------------------------------------------------------------------------
+	.code;
+		SUB	R3, R3;
+		ADDC 	R3, 0xf;
+@Store		ST 	R3, M[R0, 0x0];
+		LD	R4, M[R0, 0x0];
+		tensorMult 0x0 0x4 0x3 0x20 0x3 0x1 1 ;
+		dmaTransfer X 0x3F30 0x4 0x1 ;
+		CALL	U, @DecRegs;
+		CALL	U, @IncRegs;
+		JMP	U, @Store;
+	.endcode;

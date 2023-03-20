@@ -19,13 +19,15 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 /* Local constants and variables declarations. */
 /*---------------------------------------------------------------------------*/
 	char	crt_line[81];
-	char	crt_syllable[20], nxt_syllable[20]; /*Temporary storage for the 
+	char	crt_syllable[20], nxt_syllable[20], thr_syllable[20]; /*Temporary storage for the 
 								syllables currently expected and analyzed*/
 	int		asf_line_number = 0; /*assembly source file line number*/
 	int		i, j, k, match;
 	int 	task_counter = 0;
+	int		intr_counter = 0;
 	FILE	*task;
 	char	task_names[10][20];
+	char	intr_names[10][20], intr_jumps[10][20];
 	char	name[20];
 	int		index=0;
 	char	addr_A[20], addr_B[20], row_A[20], col_A[20], row_B[20], col_B[20], relu[20];
@@ -95,7 +97,7 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 #ifdef astDEBUG
 		printf("\nParsing line %3u: %s", asf_line_number, crt_line);
 #endif
-		sscanf(crt_line, "%s %s", &crt_syllable, &nxt_syllable);
+		sscanf(crt_line, "%s %s %s", &crt_syllable, &nxt_syllable, &thr_syllable);
 		++i;
 		if (crt_syllable[0] == ';')
 			{
@@ -121,6 +123,19 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 		//strcat(nxt_syllable, ".txt");
 		//tasks[task_counter] = fopen(nxt_syllable, "r");
 		task_counter++;
+			}
+			else if (!strcmp(crt_syllable, ".intr"))
+			{
+		fprintf(out1_fname, "%3u   %s", asf_line_number, crt_line);
+		strncpy(intr_names[intr_counter], nxt_syllable, 20);
+		strncpy(intr_jumps[intr_counter], thr_syllable, 20);
+#ifdef astDEBUG
+		printf("   The beginning of this line is OK!  Saving it in the dir.txt file. Will an interrupt %s", task_names[task_counter]);
+#endif
+
+		//strcat(nxt_syllable, ".txt");
+		//tasks[task_counter] = fopen(nxt_syllable, "r");
+		intr_counter++;
 			}
 		else if (!strcmp(crt_syllable, ".enddirectives;"))
 			{
@@ -423,9 +438,19 @@ instruction mnemonic*/
 			asf_line_number++;
 		}
 
-		fprintf(out3_fname, "%3u			RET	;\n", asf_line_number);
+		fprintf(out3_fname, "%3u			RET	;\n", asf_line_number); asf_line_number++;
 		
 		fclose(task);
+	}
+	
+/*---------------------------------------------------------------------------*/
+/*Append the code with the interrupts
+/*---------------------------------------------------------------------------*/
+	
+	for(index=0; index<intr_counter; index++)
+	{		
+		fprintf(out3_fname, "%3u 	interrupt	%s	%s;\n", asf_line_number, intr_names[index], intr_jumps[index]);
+		asf_line_number++;
 	}
 	
 	fprintf(out3_fname, "\n");

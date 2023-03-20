@@ -31,7 +31,8 @@ FILE *int1_fname; FILE *int2_fname; FILE *int3_fname; FILE	*out1_fname;
 	char	first_syllable[20], second_syllable[20], \
 			third_syllable[20], fourth_syllable[20], fifth_syllable[20]; 
 	int		Aeff = 0, code_line_number = 0, asf_line_number = 0;
-	int	i=0, j=0, k=0, match1 = 0, match2 = 0, match3 = 0, match4 = 0;
+	int	i=0, j=0, k=0, match1 = 0, match2 = 0, match3 = 0, match4 = 0, q=0;
+	int loop_index = 0;
 #define astDEBUG = 1;
 #define ErrorMnemonic	printf("\nError: Unexpected mnemonic in line %3u", asf_line_number);
 #define ErrorRifield	printf("\nError: Unexpected Ri field in line %3u", asf_line_number);
@@ -52,11 +53,22 @@ FILE *int1_fname; FILE *int2_fname; FILE *int3_fname; FILE	*out1_fname;
 	fprintf(out1_fname, "--Program Memory Initialization File \
 	\n--Created by ast_dcs_asm \
 	\nWIDTH = 14; \
-	\nDEPTH = 1024; \
+	\nDEPTH = 16384; \
 	\nADDRESS_RADIX = HEX;	%% Can be HEX, BIN or DEC %% \
 	\nDATA_RADIX = BIN;	%% Can be HEX, BIN or DEC %% \
 	\n\nCONTENT BEGIN\n \
 	\n--A> : <-OC-><Ri><Rj>\n");
+	
+		
+	
+/*---------------------------------------------------------------------------*/
+/* Initialize ALL locations in the *.mif file to 0.
+/*---------------------------------------------------------------------------*/
+		fprintf(out1_fname, \
+"[ 0 .. 3FFF ] : 00000000000000; %% Initialize full memory with 0 %% \n", crt_mif_addrs);	
+
+
+
 /*---------------------------------------------------------------------------*/
 /* Read the code.txt file and assemble into *.mif*/
 /*---------------------------------------------------------------------------*/
@@ -94,11 +106,14 @@ FILE *int1_fname; FILE *int2_fname; FILE *int3_fname; FILE	*out1_fname;
 		printf("\n \t \t \t \t \t fifth_syllable is := %s\n", fifth_syllable);
 #endif
 	match1 = 0;	match2 = 0; match3 = 0;	match4 = 0;	//++i;
+	
 /*===========================================================================
 JUMP Label Check and Update
 ===========================================================================*/
 	if (first_syllable[0] == '@')
 		{
+			
+			
 			strcat(first_syllable, ";");
 /*---------------------------------------------------------------------------*/
 /* Store the current label and associated mif file address
@@ -109,35 +124,64 @@ JUMP Label Check and Update
 /*---------------------------------------------------------------------------*/
 /* Shift syllables to account for the label
 /*---------------------------------------------------------------------------*/
-	
+
 			fpos_t ret_pos;
-			int loop_index = 0;
-			for(; loop_index < jf_index; loop_index++)
+			
+			for(loop_index = 0; loop_index < jf_index; loop_index++)
 			{
-				if (strcmp(first_syllable, jf[k].jf_label) == 0);
+				if (strcmp(first_syllable, jf[loop_index].jf_label) == 0)
 				{
 					//crt_jao = (crt_mif_addrs) - jf[k].jf_line;
 					//ast_int2binstr(crt_jao, 14, crt_char);
 					ast_int2binstr(crt_mif_addrs, 14, crt_char);
 					
 					fgetpos(out1_fname, &ret_pos);
-					fsetpos(out1_fname, &(jf[k].jf_pos));
+					fsetpos(out1_fname, &(jf[loop_index].jf_pos));
 					
 					fprintf(out1_fname, "%04x : %s; %% %s %%", \
-					jf[k].jf_line, crt_char, first_syllable);//jf[k].jf_label);
+					jf[loop_index].jf_line, crt_char, first_syllable);//jf[k].jf_label);
 					
+					printf("%04x : %s; %% %s %%", \
+					jf[loop_index].jf_line, crt_char, first_syllable);//jf[k].jf_label);
+						
 					fsetpos(out1_fname, &ret_pos);
 					
 					//break;
 				}	
-			}			
-			
+			}	
+		
 			
 			strcpy(first_syllable, second_syllable);
 			strcpy(second_syllable, third_syllable);
 			strcpy(third_syllable, fourth_syllable);
 			strcpy(fourth_syllable, fifth_syllable);
 		}
+		
+/*===========================================================================
+Apply Interrupts
+===========================================================================*/			
+	if (strcmp(first_syllable, "interrupt") == 0)
+	{
+		if(strcmp(second_syllable, "Keyboard") == 0)
+		{
+			q = 0;
+			while (q < 10)
+			{ if (strcmp(third_syllable, jca[q].jca_label) == 0)
+				{ 
+				ast_int2binstr(jca[q].jca_num, 14, crt_char); 
+				fprintf(out1_fname, "3E00 : %s; %% %s %% \n", crt_char, third_syllable);
+				//++crt_mif_addrs;
+				match1 = 1; break; 
+				} ++q;	
+			}
+		}
+		
+
+	}
+		
+		
+		
+		
 /*===========================================================================
 Assemble 2-Operand instructions: ADD, SUB, AND, OR
 ===========================================================================*/
@@ -367,7 +411,7 @@ Assemble JMP U - unconditional,
 			{
 				jf[jf_index].jf_label[str_index] = jca[k].jca_label[str_index];
 			}*/
-			strcpy(jf[jf_index].jf_label, jca[k].jca_label);
+			strcpy(jf[jf_index].jf_label, third_syllable);//jca[k].jca_label);
 			jf[jf_index].jf_line = crt_mif_addrs;
 			jf_index++;
 		
@@ -479,11 +523,7 @@ Assemble SMXU
 	}
 	
 }
-/*---------------------------------------------------------------------------*/
-/* Initialize the remaining locations in the *.mif file to 0.
-/*---------------------------------------------------------------------------*/
-		fprintf(out1_fname, \
-"[ %04x .. 3FF ] : 00000000; %% Fill the remaining locations with 0 %% \n END; \n", crt_mif_addrs);	
+
 	return;
 }	
 
