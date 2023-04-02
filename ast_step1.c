@@ -30,7 +30,7 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 	char	intr_names[10][20], intr_jumps[10][20];
 	char	name[20];
 	int		index=0;
-	char	addr_A[20], addr_B[20], row_A[20], col_A[20], row_B[20], col_B[20], relu[20];
+	char	addr_A[20], addr_B[20], row_A[20], col_A[20], row_B[20], col_B[20], relu[20], row_skip[20];
 /*---------------------------------------------------------------------------*/
 /*#define astDEBUG - printf for debugging purposes*/
 /*---------------------------------------------------------------------------*/
@@ -345,6 +345,8 @@ instruction mnemonic*/
 			fprintf(out3_fname, "%3u   		CFGD 	R4, M[R0, %s];\n", asf_line_number, addr_A); asf_line_number++;
 			fprintf(out3_fname, "%3u   		CFGD 	R3, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
 			
+			fprintf(out3_fname, "%3u   		NOP	;\n", asf_line_number); asf_line_number++;
+			
 			//transfer B
 			fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
 			fprintf(out3_fname, "%3u   		CFGD 	R1, M[R0, %s];\n", asf_line_number, row_B); asf_line_number++;
@@ -376,22 +378,22 @@ instruction mnemonic*/
 #endif
 			match = 1;
 
-			sscanf(crt_line, "%s %s %s %s %s", &crt_syllable, &nxt_syllable, &addr_A, &row_A, &col_A);
+			sscanf(crt_line, "%s %s %s %s %s %s", &crt_syllable, &nxt_syllable, &addr_A, &row_A, &col_A, &row_skip);
 
 			//determine fifo source/destination
-			if(strcmp(nxt_syllable, "A"))
+			if(strcmp(nxt_syllable, "A") == 0)
 			{
 				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x0];\n", asf_line_number); asf_line_number++;
 			}
-			else if(strcmp(nxt_syllable, "B"))
+			else if(strcmp(nxt_syllable, "B") == 0)
 			{
 				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
 			}
-			else if(strcmp(nxt_syllable, "X"))
+			else if(strcmp(nxt_syllable, "X") == 0)
 			{
 				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x2];\n", asf_line_number); asf_line_number++;
 			}
-			else if(strcmp(nxt_syllable, "W"))
+			else if(strcmp(nxt_syllable, "W") == 0)
 			{
 				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x3];\n", asf_line_number); asf_line_number++;
 			}
@@ -400,7 +402,9 @@ instruction mnemonic*/
 			fprintf(out3_fname, "%3u   		CFGD 	R1, M[R0, %s];\n", asf_line_number, row_A); asf_line_number++;
 			fprintf(out3_fname, "%3u   		CFGD 	R0, M[R0, %s];\n", asf_line_number, col_A); asf_line_number++;
 			fprintf(out3_fname, "%3u   		CFGD 	R4, M[R0, %s];\n", asf_line_number, addr_A); asf_line_number++;
+			fprintf(out3_fname, "%3u   		CFGD 	R6, M[R0, %s];\n", asf_line_number, row_skip); asf_line_number++;
 			fprintf(out3_fname, "%3u   		CFGD 	R3, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
+			fprintf(out3_fname, "%3u   		NOP	;\n", asf_line_number); asf_line_number++;
 		
 		}
 			

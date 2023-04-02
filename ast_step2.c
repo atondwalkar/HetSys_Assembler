@@ -52,12 +52,12 @@ FILE *int1_fname; FILE *int2_fname; FILE *int3_fname; FILE	*out1_fname;
 /*---------------------------------------------------------------------------*/
 	fprintf(out1_fname, "--Program Memory Initialization File \
 	\n--Created by ast_dcs_asm \
-	\nWIDTH = 14; \
-	\nDEPTH = 16384; \
+	\nWIDTH = 16; \
+	\nDEPTH = 65536; \
 	\nADDRESS_RADIX = HEX;	%% Can be HEX, BIN or DEC %% \
 	\nDATA_RADIX = BIN;	%% Can be HEX, BIN or DEC %% \
 	\n\nCONTENT BEGIN\n \
-	\n--A> : <-OC-><Ri><Rj>\n");
+	\n--A> : <--OC--><Ri><Rj>\n");
 	
 		
 	
@@ -65,7 +65,7 @@ FILE *int1_fname; FILE *int2_fname; FILE *int3_fname; FILE	*out1_fname;
 /* Initialize ALL locations in the *.mif file to 0.
 /*---------------------------------------------------------------------------*/
 		fprintf(out1_fname, \
-"[ 0 .. 3FFF ] : 00000000000000; %% Initialize full memory with 0 %% \n", crt_mif_addrs);	
+"[ 0 .. 3FFF ] : 0000000000000000; %% Initialize full memory with 0 %% \n", crt_mif_addrs);	
 
 
 
@@ -310,7 +310,7 @@ Assemble LD and ST, CFGD
 /*---------------------------------------------------------------------------*/
 			k = 0;
 			crt_val = strtol(fourth_syllable, &endptr, 16);
-			ast_int2binstr(crt_val, 14, crt_char);
+			ast_int2binstr(crt_val, 16, crt_char);
 /*---------------------------------------------------------------------------*/
 /* Printf for debugging purposes.
 /*---------------------------------------------------------------------------*/
@@ -523,6 +523,9 @@ Assemble SMXU
 	}
 	
 }
+
+
+	fprintf(out1_fname, "END;\n", asf_line_number); asf_line_number++;
 
 	return;
 }	

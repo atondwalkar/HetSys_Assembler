@@ -1,4 +1,0 @@
-  5   	.task	IncRegs	;
-  6   	.task	DecRegs ;
-  7   	.task	SaveSys	;
-  8   	.intr	Keyboard	@SaveSys	;
