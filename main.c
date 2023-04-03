@@ -56,7 +56,7 @@ of code.*/
 /*Reopen intermmediate files and output mif file:*/
 /*---------------------------------------------------------------------------*/
 	printf("\n\nThe files are now being opened.");
-	out_mif = fopen("ast_test.mif", "w"); int_dir = fopen("dir.txt", "r");
+	out_mif = fopen("mnist_program.mif", "w"); int_dir = fopen("dir.txt", "r");
 	int_const = fopen("const.txt", "r"); int_code = fopen("code.txt", "r");
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/

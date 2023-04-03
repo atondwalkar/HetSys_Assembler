@@ -13,7 +13,7 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 /* Parameter types declarations. */
 /*---------------------------------------------------------------------------*/
 	FILE *in1_fname; FILE *out1_fname; FILE *out2_fname; FILE *out3_fname;
-	const	char	*crt_im[30]; /*Current Instruction Mnemonic*/
+	const	char	*crt_im[31]; /*Current Instruction Mnemonic*/
 	{
 /*---------------------------------------------------------------------------*/
 /* Local constants and variables declarations. */
@@ -31,7 +31,7 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 	char	intr_names[10][20], intr_jumps[10][20];
 	char	name[20];
 	int		index=0;
-	char	addr_A[20], addr_B[20], row_A[20], col_A[20], row_B[20], col_B[20], relu[20], row_skip[20];
+	char	addr_A[20], addr_B[20], row_A[20], col_A[20], row_B[20], col_B[20], relu[20], row_skip[20], reg1[20];
 /*---------------------------------------------------------------------------*/
 /*#define astDEBUG - printf for debugging purposes*/
 /*---------------------------------------------------------------------------*/
@@ -282,7 +282,7 @@ have not been read AND the EOF has not been reached, continue ...
 /*Check to see if current syllable is a valid instruction mnemonic; if yes,
 save the line in the code.txt file.*/
 /*---------------------------------------------------------------------------*/
-		while ( j < 30 ) 
+		while ( j < 31 ) 
 			{
 				if (strcmp(crt_syllable, crt_im[j]) == 0)
 				{
@@ -301,7 +301,7 @@ instruction mnemonic*/
 		k = 0;
 		if (crt_syllable[0] == '@')
 			{
-			while ( k < 30 ) 
+			while ( k < 31 ) 
 				{
 				if (strcmp(nxt_syllable, crt_im[k]) == 0)
 					{
@@ -388,7 +388,7 @@ instruction mnemonic*/
 #endif
 			match = 1;
 
-			sscanf(crt_line, "%s %s %s %s %s %s", &crt_syllable, &nxt_syllable, &addr_A, &row_A, &col_A, &row_skip);
+			sscanf(crt_line, "%s %s %s %s %s %s %s", &crt_syllable, &nxt_syllable, &reg1, &addr_A, &row_A, &col_A, &row_skip);
 
 			//determine fifo source/destination
 			if(strcmp(nxt_syllable, "A") == 0)
@@ -403,7 +403,7 @@ instruction mnemonic*/
 			{
 				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x2];\n", asf_line_number); asf_line_number++;
 			}
-			else if(strcmp(nxt_syllable, "W") == 0)
+			else if(strcmp(nxt_syllable, "Q") == 0)
 			{
 				fprintf(out3_fname, "%3u   		CFGD 	R2, M[R0, 0x3];\n", asf_line_number); asf_line_number++;
 			}
@@ -411,7 +411,16 @@ instruction mnemonic*/
 			//configure rest of the registers
 			fprintf(out3_fname, "%3u   		CFGD 	R1, M[R0, %s];\n", asf_line_number, row_A); asf_line_number++;
 			fprintf(out3_fname, "%3u   		CFGD 	R0, M[R0, %s];\n", asf_line_number, col_A); asf_line_number++;
-			fprintf(out3_fname, "%3u   		CFGD 	R4, M[R0, %s];\n", asf_line_number, addr_A); asf_line_number++;
+			
+			if(strcmp(reg1, "R0") == 0)
+			{
+				fprintf(out3_fname, "%3u   		CFGD 	R4, M[R0, %s];\n", asf_line_number, addr_A); asf_line_number++;
+			}
+			else
+			{
+				fprintf(out3_fname, "%3u   		CFGD 	R4, M[%s, %s];\n",  asf_line_number, reg1, addr_A); asf_line_number++;
+			}
+			
 			fprintf(out3_fname, "%3u   		CFGD 	R6, M[R0, %s];\n", asf_line_number, row_skip); asf_line_number++;
 			fprintf(out3_fname, "%3u   		CFGD 	R3, M[R0, 0x1];\n", asf_line_number); asf_line_number++;
 			fprintf(out3_fname, "%3u   		NOP	;\n", asf_line_number); asf_line_number++;
@@ -498,7 +507,7 @@ instruction mnemonic*/
 		\nWIDTH = 16; \
 		\nDEPTH = 65536; \
 		\nADDRESS_RADIX = HEX;	%% Can be HEX, BIN or DEC %% \
-		\nDATA_RADIX = BIN;	%% Can be HEX, BIN or DEC %% \
+		\nDATA_RADIX = HEX;	%% Can be HEX, BIN or DEC %% \
 		\n\nCONTENT BEGIN\n");
 		
 		fprintf(data_file, "[ 0 .. FFFF ] : 0000000000000000; %% Initialize full memory with 0 %% \n");	

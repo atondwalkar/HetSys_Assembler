@@ -1,0 +1,121 @@
+; 	dxp's second assembly test program.
+;------------------------------------------------------------------------------
+;	Assembler directives:
+;------------------------------------------------------------------------------
+;
+;
+;
+	.directives;
+;	.mif	Biases_10x1 ;
+;	.mif	Biases_30x1 ;
+;	.mif	W30_1 ;
+;	.mif	W30_2 ;
+;	.mif	W30_3 ;
+;	.mif	W30_4 ;
+;	.mif	W30_5 ;
+;	.mif	W30_6 ;
+;	.mif	W30_7 ;
+;	.mif	W30_8 ;
+;	.mif	W30_9 ;
+;	.mif	W30_10 ;
+;	.mif	W784_1 ;
+;	.mif	W784_2 ;
+;	.mif	W784_3 ;
+;	.mif	W784_4 ;
+;	.mif	W784_5 ;
+;	.mif	W784_6 ;
+;	.mif	W784_7 ;
+;	.mif	W784_8 ;
+;	.mif	W784_9 ;
+;	.mif	W784_10 ;
+;	.mif	W784_11 ;
+;	.mif	W784_12 ;
+;	.mif	W784_13 ;
+;	.mif	W784_14 ;
+;	.mif	W784_15 ;
+;	.mif	W784_16 ;
+;	.mif	W784_17 ;
+;	.mif	W784_18 ;
+;	.mif	W784_19 ;
+;	.mif	W784_20 ;
+;	.mif	W784_21 ;
+;	.mif	W784_22 ;
+;	.mif	W784_23 ;
+;	.mif	W784_24 ;
+;	.mif	W784_25 ;
+;	.mif	W784_26 ;
+;	.mif	W784_27 ;
+;	.mif	W784_28 ;
+;	.mif	W784_29 ;
+;	.mif	W784_30 ;
+;	.mif	Test_Digits ;
+;	.mif	Identity ;
+	.enddirectives;
+;------------------------------------------------------------------------------
+;	Constant segment:
+;------------------------------------------------------------------------------
+; These values are initialized in the locations at the end of the code segment.
+; For now, .word is the only constant initialization assembly directive.
+; After assembling the code, during the final run, the constant name is 
+;   replaced with its location address in the program memory.
+	.constants;
+;
+	;.word	firstConstWord	0xFFFF;
+	;
+	.endconstants;
+;------------------------------------------------------------------------------
+;	Code segment:
+;------------------------------------------------------------------------------
+	.code;
+		SUB	R5, R5;
+		SUB	R6, R6;
+		SUB	R7, R7;
+		SUB	R2, R2;
+		SUB	R3, R3;
+		SUB	R4, R4;
+		SUB	R11, R11;
+;
+		ADDC	R5, 0x3;
+		ROTL	R5, 0x2;
+		ADDC	R5, 0x1;
+		ROTL	R5, 0x3;
+		ADDC	R5, 0x1;
+		ADDC	R6, 0x7;
+		ROTL	R6, 0x2;
+		ADDC	R7, 0xF;
+		ROTL	R7, 0x1;
+;
+		ADDC	R11, 0x7;
+		ROTL	R11, 0x2;
+;
+@m1		NOP ;
+		dmaTransfer A R2 0x154 0x1E 0x1C 0x310 ;	
+		dmaTransfer B R3 0x5D34 0x1C 0x1 0x0 ;
+		SMXU 0 ;
+		NOP ;
+		NOP ;
+		dmaTransfer X R4 0x9200 0x1E 0x1 0x0 ;
+;
+		ADD	R2, R6;
+		ADD	R3, R6;
+		ADD	R4, R7;
+		SUBC	R11, 0x1;
+		JMP	Z0, @m1;
+;
+		dmaTransfer B R0 0x9200 0x1C 0x1E 0x0 ;
+		CMXU ;
+		dmaTransfer Q R0 0xA 0x1 0x1E 0x0 ;
+		dmaTransfer A R0 0x8E34 0x1 0x1E 0x0 ;
+		SMXU 1 ;
+		NOP ;
+		NOP ;
+		dmaTransfer X R0 0xF300 0x1 0x1E 0x0 ;
+;
+		dmaTransfer A R0 0x28 0xA 0x1E 0x0 ;
+		dmaTransfer B R0 0xF300 0x1E 0x1 0x0 ;
+		dmaTransfer Q R0 0x0 0xA 0x1 ;
+		SMXU 1 ;
+		NOP ;
+		NOP ;
+		dmaTransfer X R0 0xF500 0xA 0x1 ;
+	.endcode;

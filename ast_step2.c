@@ -14,7 +14,7 @@ void step2_assembly(int1_fname, int2_fname, \
 /* Parameter types declarations. */
 /*---------------------------------------------------------------------------*/
 FILE *int1_fname; FILE *int2_fname; FILE *int3_fname; FILE	*out1_fname;
-	const char *crt_im[30]; const char *crt_opcode[30]; \
+	const char *crt_im[31]; const char *crt_opcode[31]; \
 	const char *crt_ri[16]; const char *crt_rifv[16]; const char *crt_rj[16]; \
 	const char *crt_rjfv[16]; const char *crt_mri[16];
 	{
@@ -133,7 +133,7 @@ JUMP Label Check and Update
 				{
 					//crt_jao = (crt_mif_addrs) - jf[k].jf_line;
 					//ast_int2binstr(crt_jao, 14, crt_char);
-					ast_int2binstr(crt_mif_addrs, 14, crt_char);
+					ast_int2binstr(crt_mif_addrs, 16, crt_char);
 					
 					fgetpos(out1_fname, &ret_pos);
 					fsetpos(out1_fname, &(jf[loop_index].jf_pos));
@@ -398,7 +398,7 @@ Assemble JMP U - unconditional,
 			{ 
 			//crt_jao = jca[k].jca_num - (crt_mif_addrs);
 			//ast_int2binstr(crt_jao, 14, crt_char); 
-			ast_int2binstr(jca[k].jca_num, 14, crt_char); 
+			ast_int2binstr(jca[k].jca_num, 16, crt_char); 
 			
 			match3 = 1; break; 
 			} ++k;	
@@ -417,7 +417,7 @@ Assemble JMP U - unconditional,
 		
 			printf("\n this is a forward jump \n"); 
 			//strcpy(crt_char, jca[k].jca_label); 
-			ast_int2binstr(crt_mif_addrs, 14, crt_char); 
+			ast_int2binstr(crt_mif_addrs, 16, crt_char); 
 			}
 /*---------------------------------------------------------------------------*/
 /* Printf for debugging purposes.
@@ -505,7 +505,7 @@ Assemble SMXU
 	
 		{ strcpy(crt_iw0, crt_opcode[i]); match1 = 1; k = 0;
 		
-		if(strcmp(second_syllable, "1") == 0)
+		if(strcmp(second_syllable, "0") == 0)
 		{
 			strcat(crt_iw0, "00000000");
 		}	
@@ -513,6 +513,26 @@ Assemble SMXU
 		{
 			strcat(crt_iw0, "00000001");
 		}
+		
+		fprintf(out1_fname, "%04x : %s; %% %s %% \n", \
+		crt_mif_addrs, crt_iw0, first_syllable);
+		++crt_mif_addrs;	}
+	
+			if (match1 == 0) { ErrorMnemonic; break; }	
+		++i;
+	}
+	
+/*===========================================================================
+Assemble CMXU
+===========================================================================*/	
+	i = 30;
+	while(i != 31)
+	{
+		if (strcmp(first_syllable, crt_im[i]) == 0)
+	
+		{ strcpy(crt_iw0, crt_opcode[i]); match1 = 1; k = 0;
+
+		strcat(crt_iw0, "00000000");
 		
 		fprintf(out1_fname, "%04x : %s; %% %s %% \n", \
 		crt_mif_addrs, crt_iw0, first_syllable);
