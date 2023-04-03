@@ -51,7 +51,7 @@ FILE *int1_fname; FILE *int2_fname; FILE *int3_fname; FILE	*out1_fname;
 /* Print the header of the ast.mif file */
 /*---------------------------------------------------------------------------*/
 	fprintf(out1_fname, "--Program Memory Initialization File \
-	\n--Created by ast_dcs_asm \
+	\n--Created by ast_ai_asm \
 	\nWIDTH = 16; \
 	\nDEPTH = 65536; \
 	\nADDRESS_RADIX = HEX;	%% Can be HEX, BIN or DEC %% \
@@ -65,7 +65,7 @@ FILE *int1_fname; FILE *int2_fname; FILE *int3_fname; FILE	*out1_fname;
 /* Initialize ALL locations in the *.mif file to 0.
 /*---------------------------------------------------------------------------*/
 		fprintf(out1_fname, \
-"[ 0 .. 3FFF ] : 0000000000000000; %% Initialize full memory with 0 %% \n", crt_mif_addrs);	
+"[ 0 .. FFFF ] : 0000000000000000; %% Initialize full memory with 0 %% \n", crt_mif_addrs);	
 
 
 

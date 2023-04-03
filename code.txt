@@ -1,8 +1,18 @@
- 24   		CFGD 	R2, M[R0, 0x0];
- 25   		CFGD 	R1, M[R0, 0x2];
- 26   		CFGD 	R0, M[R0, 0x3];
- 27   		CFGD 	R4, M[R0, 0x0];
- 28   		CFGD 	R6, M[R0, 0x8];
- 29   		CFGD 	R3, M[R0, 0x1];
- 30   		NOP	;
+ 69   		SUB	R3, R3;
+ 70   		ADDC 	R3, 0xf;
+ 71   @Store		ST 	R3, M[R0, 0x0];
+ 72   		LD	R4, M[R0, 0x0];
+ 73   		CALL	U, @DecRegs;
+ 74   		CALL	U, @IncRegs;
+ 75   		JMP	U, @Store;
+ 76 @IncRegs		NOP	;
+ 77   		ADDC	R3, 0x1;
+ 78   		ADDC	R4, 0x1;
+ 79   		ADDC	R5, 0x1;
+ 80			RET	;
+ 81 @DecRegs		NOP	;
+ 82   		SUBC	R3, 0x1;
+ 83   		SUBC	R4, 0x1;
+ 84   		SUBC	R5, 0x1;
+ 85			RET	;
 

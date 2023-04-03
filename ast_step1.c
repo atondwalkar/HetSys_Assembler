@@ -25,8 +25,9 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 	int		i, j, k, match;
 	int 	task_counter = 0;
 	int		intr_counter = 0;
+	int 	mif_counter = 0;
 	FILE	*task;
-	char	task_names[10][20];
+	char	task_names[10][20], mif_names[50][30];
 	char	intr_names[10][20], intr_jumps[10][20];
 	char	name[20];
 	int		index=0;
@@ -90,7 +91,7 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 /* Read the next lines; expect more comments, .equ directives or the end of the directives segment */
 /*---------------------------------------------------------------------------*/
 	i = 0;
-	while ((strcmp(crt_syllable, ".enddirectives;")) && (i != 20))
+	while ((strcmp(crt_syllable, ".enddirectives;")) && (i != 60))
 		{
 		fgets(crt_line, 81, in1_fname);
 		++asf_line_number;
@@ -123,6 +124,15 @@ void step1_syntax_check(in1_fname, out1_fname, out2_fname, out3_fname, crt_im)
 		//strcat(nxt_syllable, ".txt");
 		//tasks[task_counter] = fopen(nxt_syllable, "r");
 		task_counter++;
+			}
+			else if (!strcmp(crt_syllable, ".mif"))
+			{
+		fprintf(out1_fname, "%3u   %s", asf_line_number, crt_line);
+		strncpy(mif_names[mif_counter], nxt_syllable, 20);
+#ifdef astDEBUG
+		printf("   The beginning of this line is OK!  Saving it in the dir.txt file. Will append a data file with %s", mif_names[mif_counter]);
+#endif
+			mif_counter++;
 			}
 			else if (!strcmp(crt_syllable, ".intr"))
 			{
@@ -407,13 +417,16 @@ instruction mnemonic*/
 			fprintf(out3_fname, "%3u   		NOP	;\n", asf_line_number); asf_line_number++;
 		
 		}
+		
+		
+		
 			
 			
 	}/*End of sixth while loop*/
 	
 
-	
-	
+
+
 	
 	
 	
@@ -421,31 +434,35 @@ instruction mnemonic*/
 /*Append the code with the tasks included from the directives
 /*---------------------------------------------------------------------------*/
 	
-	for(index=0; index<task_counter; index++)
-	{
-		strncpy(name, task_names[index], 20);
-		strcat(name, ".txt");
-		printf("   Opening file %s.", name);
-		task = fopen(name, "r");
-		
-		fprintf(out3_fname, "%3u @%s		NOP	;\n", asf_line_number, task_names[index]);
-		asf_line_number++;
-		
-		fgets(crt_line, 81, task);
-		sscanf(crt_line, "%s", &crt_syllable);
-		while(strcmp(crt_syllable, "EOT") != 0)
+	if(task_counter > 0)
+	{		
+		for(index=0; index<task_counter; index++)
 		{
-			fprintf(out3_fname, "%3u   %s", asf_line_number, crt_line);
-			//printf("Printing %s at %3u.\n", task_names[index], asf_line_number);
+			strncpy(name, task_names[index], 20);
+			strcat(name, ".txt");
+			printf("   Opening file %s.", name);
+			task = fopen(name, "r");
+			
+			fprintf(out3_fname, "%3u @%s		NOP	;\n", asf_line_number, task_names[index]);
+			asf_line_number++;
+			
 			fgets(crt_line, 81, task);
 			sscanf(crt_line, "%s", &crt_syllable);
-			asf_line_number++;
+			while(strcmp(crt_syllable, "EOT") != 0)
+			{
+				fprintf(out3_fname, "%3u   %s", asf_line_number, crt_line);
+				//printf("Printing %s at %3u.\n", task_names[index], asf_line_number);
+				fgets(crt_line, 81, task);
+				sscanf(crt_line, "%s", &crt_syllable);
+				asf_line_number++;
+			}
+	
+			fprintf(out3_fname, "%3u			RET	;\n", asf_line_number); asf_line_number++;
+			
+			fclose(task);
 		}
-
-		fprintf(out3_fname, "%3u			RET	;\n", asf_line_number); asf_line_number++;
-		
-		fclose(task);
 	}
+
 	
 /*---------------------------------------------------------------------------*/
 /*Append the code with the interrupts
@@ -458,6 +475,71 @@ instruction mnemonic*/
 	}
 	
 	fprintf(out3_fname, "\n");
+	
+	
+	
+		
+/*---------------------------------------------------------------------------*/
+/*Creating Data file with links
+/*---------------------------------------------------------------------------*/
+	
+	if(mif_counter > 0)
+	{
+		//crt_line = 0;
+		asf_line_number = 0;
+		int q;
+		crt_line[0] = 0;
+			
+		FILE* data_file = fopen("nndata.mif", "w");
+		FILE* mif;
+
+		fprintf(data_file, "--Data Memory Initialization File \
+		\n--Created by ast_ai_asm \
+		\nWIDTH = 16; \
+		\nDEPTH = 65536; \
+		\nADDRESS_RADIX = HEX;	%% Can be HEX, BIN or DEC %% \
+		\nDATA_RADIX = BIN;	%% Can be HEX, BIN or DEC %% \
+		\n\nCONTENT BEGIN\n");
+		
+		fprintf(data_file, "[ 0 .. FFFF ] : 0000000000000000; %% Initialize full memory with 0 %% \n");	
+		
+		for(index=0; index<mif_counter; index++)
+		{
+			strncpy(name, mif_names[index], 30);
+			strcat(name, ".mif");
+			printf("   Opening file %s.\r\n", name);
+			mif = fopen(name, "r");
+			
+			for(q=0; q<7; q++){ fgets(crt_line, 81, mif); }
+			
+			//fgets(crt_line, 81, task);
+			//sscanf(crt_line, "%s", &crt_syllable);
+			
+			while(1)
+			{
+				fgets(crt_line, 81, mif);
+				sscanf(crt_line, "%s %s %s", &crt_syllable, &nxt_syllable, &thr_syllable);
+				if(strcmp(crt_syllable, "END;") == 0)
+					break;
+				fprintf(data_file, "%04x : %s\n", asf_line_number, thr_syllable);
+				#ifdef astDEBUG
+				printf("   Appending Data file with: %s\r\n", thr_syllable);
+				#endif
+				asf_line_number++;
+			}
+
+			fclose(mif);
+		}
+		
+		fprintf(data_file, "END;");		
+		
+		fclose(data_file);
+	}
+	
+	
+	
+	
+	
 	return;
 }
 
