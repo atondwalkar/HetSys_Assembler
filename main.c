@@ -3,9 +3,8 @@
 /* My include header file */
 #include "ast_asm.h"
 
-/* ASSEMBLER FOR DCS 621 LAB 4 */
+/* ASSEMBLER FOR HET SYS */
 /* ASHISH TONDWALKAR */
-/* AST4798 */
 
 
 /*===========================================================================*/
